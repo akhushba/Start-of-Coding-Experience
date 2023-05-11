@@ -1,2 +1,2 @@
 # codePractice
-Small steps taken to become a software engineer.
+Coding practice from high school.
