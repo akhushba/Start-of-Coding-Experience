@@ -3,10 +3,18 @@ import java.util.ArrayList;
 
 public class BankAccount {
 
-  String accountNumber, description;
+  String accountNumber;
   double balance, withdrawalFee, annualInterestRate;
   ArrayList<Transaction> allTransactions = new ArrayList<Transaction>();
-  Transaction trans;
+
+  private void addTransList(Transaction newTrans){ //helper to add transaction to right spot
+    for(int i = 0; i <= allTransactions.size(); i++){
+      if(i == allTransactions.size()) 
+      allTransactions.add(newTrans);
+      else if(newTrans.getTransactionTime().compareTo(allTransactions.get(i).getTransactionTime()) < 0) 
+      allTransactions.add(i, newTrans);
+    }
+  }
 
   // accessor for account number
   public String getAccountNumber() {
@@ -60,82 +68,43 @@ public class BankAccount {
   // desposit added to balance
   public void deposit(double amount) {
     balance += amount;
-    description = "deposit";
-
-    // add it to the list of overall transactions
-    trans = new Transaction(amount, description);
-    allTransactions.add(trans);
+    Transaction trans = new Transaction(amount, "deposit");
+    allTransactions.add(trans); //add to end, no time specified
   }
 
   // new deposit for all parameters
   public void deposit(LocalDateTime transactionTime, double amount, String description) {
-
     balance += amount;
-    trans = new Transaction(transactionTime, amount, description);
-
-    // adding it to the end, or starting to add to the list
-    if (allTransactions.size() == 0 || transactionTime.isAfter(allTransactions.get(allTransactions.size() - 1).getTransactionTime())) {
-      allTransactions.add(trans);
-
-      // adding it in the middle
-    } else {
-      for (int i = 0; i < allTransactions.size(); i++) {
-        if (transactionTime.compareTo(allTransactions.get(i).getTransactionTime()) < 0) {
-          allTransactions.add(i, trans);
-          break;
-        }
-      }
-    }
+    Transaction trans = new Transaction(transactionTime, amount, description);
+    addTransList(trans) //add to correct spot as time specified
   }
 
   // new depsoit for only amount and description
   public void deposit(double amount, String description) {
     balance += amount;
-
-    // add it to the list of overall transactions
-    trans = new Transaction(amount, description);
-    allTransactions.add(trans);
+    Transaction trans = new Transaction(amount, description);
+    allTransactions.add(trans); //add to end, no time specified
   }
 
   // withdrawal and withdrawal fee taken away from balance
   public void withdraw(double amount) {
     balance -= (amount + withdrawalFee);
-    description = "withdrawal";
-
-    // add it to the list of overall transactions
-    trans = new Transaction(amount, description);
-    allTransactions.add(trans);
+    Transaction trans = new Transaction(amount, "withdrawal");
+    allTransactions.add(trans); //add to end, no time specified
   }
 
   // new withdrawal for all parameters
   public void withdraw(LocalDateTime transactionTime, double amount, String description) {
     balance -= (amount + withdrawalFee);
-    trans = new Transaction(transactionTime, amount, description);
-
-    // adding it to the end, or starting to add to the list
-    if (allTransactions.size() == 0
-        || transactionTime.isAfter(allTransactions.get(allTransactions.size() - 1).getTransactionTime())) {
-      allTransactions.add(trans);
-
-      // adding it in the middle
-    } else {
-      for (int i = 0; i < allTransactions.size(); i++) {
-        if (transactionTime.compareTo(allTransactions.get(i).getTransactionTime()) < 0) {
-          allTransactions.add(i, trans);
-          break;
-        }
-      }
-    }
-
+    Transaction trans = new Transaction(transactionTime, amount, description);
+    addTransList(trans) //add to correct spot as time specified
   }
 
   // new withdrawal for only amount and description
   public void withdraw(double amount, String description) {
     balance -= (amount + withdrawalFee);
-
-    // add it to the list of overall transactions
-    trans = new Transaction(amount, description);
-    allTransactions.add(trans);
+    Transaction trans = new Transaction(amount, description);
+    allTransactions.add(trans); //add to end, no time specified
   }
 
   // testing to see if you have a negative balance
@@ -151,47 +120,20 @@ public class BankAccount {
   public String toString() {
     if (balance >= 0) {
       return "BankAccount " + accountNumber + ": $" + String.format("%.02f", balance);
-
     } else {
-      balance *= -1;
-      return "BankAccount " + accountNumber + ": ($" + String.format("%.02f", balance) + ")";
+      return "BankAccount " + accountNumber + ": ($" + String.format("%.02f", (balance * -1)) + ")";
     }
   }
 
   // Gets you a list of every transaction within a defined time
   public ArrayList getTransactions(LocalDateTime startTime, LocalDateTime endTime) {
-
-    // creating the list for selected transactions every single time the method is called
     ArrayList<Transaction> selectTransactions = new ArrayList<Transaction>();
-
-    // running through all the options
     for (int i = 0; i < allTransactions.size(); i++) {
-
-      // defining only an end time
-      if (startTime == null && endTime != null) {
-        if (allTransactions.get(i).getTransactionTime().compareTo(endTime) <= 0) {
+      if ((startTime == null || allTransactions.get(i).getTransactionTime().compareTo(startTime) >= 0) && 
+      (endTime == null || allTransactions.get(i).getTransactionTime().compareTo(endTime) <= 0)) {
           selectTransactions.add(allTransactions.get(i));
-        }
-
-        // defining only a start time
-      } else if (startTime != null && endTime == null) {
-        if (allTransactions.get(i).getTransactionTime().compareTo(startTime) >= 0) {
-          selectTransactions.add(allTransactions.get(i));
-        }
-
-        // no definite start or end
-      } else if (startTime == null && endTime == null) {
-        selectTransactions.add(allTransactions.get(i));
-
-        // defining a start time and an end time
-      } else if (startTime != null && endTime != null) {
-        if (allTransactions.get(i).getTransactionTime().compareTo(endTime) <= 0
-            && allTransactions.get(i).getTransactionTime().compareTo(startTime) >= 0) {
-          selectTransactions.add(allTransactions.get(i));
-        }
       }
     }
-
     return selectTransactions;
   }
 }
